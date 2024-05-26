@@ -7,15 +7,7 @@ use conv::{
 use parking_lot::Mutex;
 use smallvec::SmallVec;
 use std::{
-    borrow::Cow,
-    error,
-    ffi::{CStr, CString},
-    fmt::Display,
-    mem,
-    num::NonZeroU64,
-    sync::Arc,
-    sync::{atomic, OnceLock},
-    thread,
+    borrow::Cow, error, ffi::{CStr, CString}, fmt::Display, mem, num::NonZeroU64, ptr::null, sync::{atomic, Arc, OnceLock}, thread
 };
 use utils::{
     get_base_device_limits_from_adapter_limits, make_slice, ptr_into_label, ptr_into_path,
@@ -4287,6 +4279,124 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
 ) {
     let pass = pass.as_ref().expect("invalid render pass");
     let encoder = pass.encoder.as_mut().unwrap();
-
     render_ffi::wgpu_render_pass_end_pipeline_statistics_query(encoder);
 }
+
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanDevicePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device.context.device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        let raw_handle = hal_device.raw_device().handle();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
+    let instance = instance.as_ref().expect("invalid instance");
+
+    let mut result: u64 = 0;
+
+    let raw_handle = instance.context.instance_as_hal::<wgc::api::Vulkan>().unwrap().shared_instance().raw_instance().handle();
+
+    result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+
+    result
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanQueuePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device.context.device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        let raw_handle = hal_device.raw_queue();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
+    let instance = instance.as_ref().expect("invalid instance");
+
+    let mut result: u64 = 0;
+
+    instance.context.instance_as_hal::<wgc::api::Vulkan>().unwrap();
+
+    result
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanPhysicalDevicePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device.context.device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        let raw_handle = hal_device.raw_physical_device();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
+// GraphicsQueueIndex
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanGraphicsQueueFamilyIndex(device: native::WGPUDevice) -> u32 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u32 = 0;
+
+    device.context.device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        result = hal_device.queue_family_index()
+    });
+
+    result
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPUTexture) -> u64 {
+    let texture = texture.as_ref().expect("invalid texture");
+
+    let mut result: u64 = 0;
+
+    texture.context.texture_as_hal::<wgc::api::Vulkan, _>(texture.id, |hal_texture| {
+        let hal_texture = hal_texture.unwrap();
+        let raw_handle = hal_texture.raw_handle();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
+/*
+#[no_mangle]
+#[cfg(metal)]
+pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUTexture) -> u64 {
+    let texture = texture.as_ref().expect("invalid texture");
+
+    let mut result: u64 = 0;
+
+    texture.context.texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
+        let hal_texture = hal_texture.unwrap();
+        let raw_handle = hal_texture.raw_handle();
+        // cast raw_handle to usize
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}*/
