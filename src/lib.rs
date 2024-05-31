@@ -4413,7 +4413,6 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevic
     result
 }
 
-/*
 #[no_mangle]
 #[cfg(metal)]
 pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUTexture) -> u64 {
@@ -4423,10 +4422,62 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
 
     texture.context.texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
         let hal_texture = hal_texture.unwrap();
-        let raw_handle = hal_texture.raw_handle();
+        //let raw_handle = hal_texture.raw;
         // cast raw_handle to usize
-        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+        result = unsafe { std::mem::transmute::<_, u64>(hal_texture) };
     });
 
     result
-}*/
+}
+
+
+#[no_mangle]
+#[cfg(metal)]
+pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(adapter: native::WGPUAdapter, mtl_command_queue: *mut metal::MTLCommandQueue) -> DeviceAndQueue {
+    use metal::foreign_types::ForeignType;
+    use wgc::api::Metal;
+
+    let (device, queue) = unsafe {
+        let mtl_queue = metal::CommandQueue::from_ptr(mtl_command_queue);
+        let mtl_device = mtl_queue.device();
+
+        let adapter = adapter.as_ref().expect("invalid adapter");
+
+        let wgpu_features = wgpu::Features::empty();
+
+        let wgpu_open_device = unsafe {
+            adapter.device_from_raw(
+                mtl_device,
+                true,
+                &enabled_extensions,
+                wgpu_features,
+                family_info.queue_family_index,
+                0,
+            )
+        }?;
+
+        adapter.create_device_from_hal(wgc::hal_api::OpenDevice::<Metal> {
+            device: wgpu_open_device,
+            queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_queue)
+        }, &wgpu::DeviceDescriptor {
+            label: None,
+            features: wgpu_features,
+            limits: wgpu::Limits {
+                max_bind_groups: 8,
+                max_storage_buffer_binding_size: wgpu_adapter
+                    .limits()
+                    .max_storage_buffer_binding_size,
+                max_push_constant_size: 4,
+                ..Default::default()
+            },
+        }, None).unwrap()
+    };
+
+    let device_and_queue = DeviceAndQueue {
+        device: device,
+        queue: queue,
+    };
+ 
+
+}
+
