@@ -4514,7 +4514,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
         };
         let base_limits = get_base_device_limits_from_adapter_limits(&adapter_limits);
 
-        let (desc, trace_str, device_lost_handler) = match descriptor {
+        let (mut desc, trace_str, device_lost_handler) = match descriptor {
             Some(descriptor) => {
                 let (desc, trace_str) = follow_chain!(
                     map_device_descriptor((descriptor, base_limits),
@@ -4535,6 +4535,10 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
                 DEFAULT_DEVICE_LOST_HANDLER,
             ),
         };
+
+        println!("Creating device with {:?}", desc.required_features);
+
+        desc.required_features.set(wgt::Features::SHADER_UNUSED_VERTEX_OUTPUT, true);
 
         let mtl_queue = ::metal::CommandQueue::from_ptr(mtl_command_queue);
         let mtl_device = mtl_queue.device();
