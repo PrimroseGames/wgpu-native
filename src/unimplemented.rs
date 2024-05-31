@@ -3,7 +3,7 @@ use crate::native;
 #[no_mangle]
 pub extern "C" fn wgpuAdapterRequestAdapterInfo(
     _adapter: native::WGPUAdapter,
-    _callback: native::WGPUAdapterRequestAdapterInfoCallback,
+    _callback: native::WGPURequestAdapterCallback,
     _userdata: *mut ::std::os::raw::c_void,
 ) {
     unimplemented!();
@@ -82,7 +82,7 @@ pub extern "C" fn wgpuComputePipelineSetLabel(
 pub extern "C" fn wgpuDeviceCreateComputePipelineAsync(
     _device: native::WGPUDevice,
     _descriptor: *const native::WGPUComputePipelineDescriptor,
-    _callback: native::WGPUDeviceCreateComputePipelineAsyncCallback,
+    _callback: native::WGPUCreateComputePipelineAsyncCallback,
     _userdata: *mut ::std::os::raw::c_void,
 ) {
     unimplemented!();
@@ -92,7 +92,7 @@ pub extern "C" fn wgpuDeviceCreateComputePipelineAsync(
 pub extern "C" fn wgpuDeviceCreateRenderPipelineAsync(
     _device: native::WGPUDevice,
     _descriptor: *const native::WGPURenderPipelineDescriptor,
-    _callback: native::WGPUDeviceCreateRenderPipelineAsyncCallback,
+    _callback: native::WGPUCreateRenderPipelineAsyncCallback,
     _userdata: *mut ::std::os::raw::c_void,
 ) {
     unimplemented!();
@@ -106,13 +106,6 @@ pub extern "C" fn wgpuDeviceSetLabel(
     unimplemented!();
 }
 
-#[no_mangle]
-pub extern "C" fn wgpuInstanceHasWGSLLanguageFeature(
-    _instance: native::WGPUInstance,
-    _feature: native::WGPUWGSLFeatureName,
-) -> bool {
-    unimplemented!();
-}
 
 #[no_mangle]
 pub extern "C" fn wgpuInstanceProcessEvents(_instance: native::WGPUInstance) {
@@ -186,7 +179,7 @@ pub extern "C" fn wgpuSamplerSetLabel(
 #[no_mangle]
 pub extern "C" fn wgpuShaderModuleGetCompilationInfo(
     _shader_module: native::WGPUShaderModule,
-    _callback: native::WGPUShaderModuleGetCompilationInfoCallback,
+    _callback: native::WGPUCompilationInfoCallback,
     _userdata: *mut ::std::os::raw::c_void,
 ) {
     unimplemented!();

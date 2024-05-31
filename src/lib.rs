@@ -772,7 +772,7 @@ pub unsafe extern "C" fn wgpuAdapterHasFeature(
 pub unsafe extern "C" fn wgpuAdapterRequestDevice(
     adapter: native::WGPUAdapter,
     descriptor: Option<&native::WGPUDeviceDescriptor>,
-    callback: native::WGPUAdapterRequestDeviceCallback,
+    callback: native::WGPURequestDeviceCallback,
     userdata: *mut std::os::raw::c_void,
 ) {
     let (adapter_id, context) = {
@@ -982,7 +982,7 @@ pub unsafe extern "C" fn wgpuBufferMapAsync(
     mode: native::WGPUMapModeFlags,
     offset: usize,
     size: usize,
-    callback: native::WGPUBufferMapAsyncCallback,
+    callback: native::WGPUBufferMapCallback,
     userdata: *mut std::ffi::c_void,
 ) {
     let (buffer_id, context, error_sink) = {
@@ -1172,9 +1172,9 @@ pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
             make_slice(descriptor.colorAttachments, descriptor.colorAttachmentCount)
                 .iter()
                 .map(|color_attachment| {
-                    if color_attachment.depthSlice != native::WGPU_DEPTH_SLICE_UNDEFINED {
-                        log::warn!("Depth slice on color attachments is not implemented");
-                    }
+                    //if color_attachment.depthSlice != native::WGPU_DEPTH_SLICE_UNDEFINED {
+                    //    log::warn!("Depth slice on color attachments is not implemented");
+                    //}
 
                     color_attachment.view.as_ref().map(|view| {
                         wgc::command::RenderPassColorAttachment {
@@ -2687,7 +2687,7 @@ pub unsafe extern "C" fn wgpuInstanceCreateSurface(
 pub unsafe extern "C" fn wgpuInstanceRequestAdapter(
     instance: native::WGPUInstance,
     options: Option<&native::WGPURequestAdapterOptions>,
-    callback: native::WGPUInstanceRequestAdapterCallback,
+    callback: native::WGPURequestAdapterCallback,
     userdata: *mut std::os::raw::c_void,
 ) {
     let instance = instance.as_ref().expect("invalid instance");
@@ -2853,7 +2853,7 @@ pub unsafe extern "C" fn wgpuQuerySetRelease(query_set: native::WGPUQuerySet) {
 }
 
 // Queue methods
-
+/* 
 #[no_mangle]
 pub unsafe extern "C" fn wgpuQueueOnSubmittedWorkDone(
     queue: native::WGPUQueue,
@@ -2876,7 +2876,7 @@ pub unsafe extern "C" fn wgpuQueueOnSubmittedWorkDone(
     {
         handle_error_fatal(context, cause, "wgpuQueueOnSubmittedWorkDone");
     };
-}
+}*/
 
 #[no_mangle]
 pub unsafe extern "C" fn wgpuQueueSubmit(
@@ -4540,9 +4540,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
             ),
         };
 
-        println!("Creating device with {:?}", desc.required_features);
-
-        desc.required_features.set(wgt::Features::SHADER_UNUSED_VERTEX_OUTPUT, true);
+        //desc.required_features.set(wgt::Features::SHADER_UNUSED_VERTEX_OUTPUT, true);
 
         let mtl_queue = ::metal::CommandQueue::from_ptr(mtl_command_queue);
         let mtl_device = mtl_queue.device();
