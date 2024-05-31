@@ -4383,6 +4383,36 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPU
     result
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDevice) -> u64 {
+    let device = texture.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device.context.device_as_hal::<wgc::api::Dx12, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        let raw_handle = hal_device.raw_device();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device.context.device_as_hal::<wgc::api::Dx12, _, _>(device.id, |hal_device| {
+        let hal_device = hal_device.unwrap();
+        let raw_handle = hal_device.raw_queue();
+        result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+    });
+
+    result
+}
+
 /*
 #[no_mangle]
 #[cfg(metal)]
