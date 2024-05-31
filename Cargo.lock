@@ -1026,6 +1026,7 @@ dependencies = [
  "bindgen",
  "cfg_aliases",
  "log",
+ "metal",
  "naga",
  "parking_lot",
  "paste",
@@ -1034,6 +1035,7 @@ dependencies = [
  "smallvec",
  "thiserror",
  "wgpu-core",
+ "wgpu-hal",
  "wgpu-types",
 ]
 
