@@ -4455,6 +4455,16 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevic
     result
 }
 
+#[derive(Debug)]
+pub struct Texture2 {
+    pub raw: metal::Texture,
+    pub format: wgt::TextureFormat,
+    pub raw_type: metal::MTLTextureType,
+    pub array_layers: u32,
+    pub mip_levels: u32,
+    pub copy_size: hal::CopyExtent,
+}
+
 #[no_mangle]
 #[cfg(metal)]
 pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUTexture) -> u64 {
@@ -4466,9 +4476,11 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
         .context
         .texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
             let hal_texture = hal_texture.unwrap();
-            //let raw_handle = hal_texture.raw;
-            // cast raw_handle to usize
-            result = unsafe { std::mem::transmute::<_, u64>(hal_texture) };
+            
+            unsafe {
+                let hal_texture_ptr = std::mem::transmute::<_, &Texture2>(hal_texture);
+                result = std::mem::transmute::<_, u64>(hal_texture_ptr.raw.clone());
+            }
         });
 
     result
