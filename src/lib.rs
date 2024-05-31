@@ -4477,6 +4477,7 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
         .texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
             let hal_texture = hal_texture.unwrap();
             
+            // TODO(important): really bad hack because wgpu doesn't expose the fucking raw texture handle from metal
             unsafe {
                 let hal_texture_ptr = std::mem::transmute::<_, &Texture2>(hal_texture);
                 result = std::mem::transmute::<_, u64>(hal_texture_ptr.raw.clone());
@@ -4538,18 +4539,10 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
         let mtl_queue = ::metal::CommandQueue::from_ptr(mtl_command_queue);
         let mtl_device = mtl_queue.device();
 
-        let limits = wgt::Limits {
-            max_bind_groups: 8,
-            max_push_constant_size: 4,
-            ..Default::default()
-        };
-
-        let adapter_features = wgt::Features::empty();
-
         let open_device = hal::OpenDevice::<hal::metal::Api> {
             device: <wgc::api::Metal as hal::Api>::Device::device_from_raw(
                 mtl_device.to_owned(),
-                adapter_features,
+                desc.required_features,
             ),
             queue: <wgc::api::Metal as hal::Api>::Queue::queue_from_raw(mtl_queue, 1.0),
         };
