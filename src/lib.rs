@@ -4460,6 +4460,7 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevic
 }
 
 #[derive(Debug)]
+#[cfg(metal)]
 pub struct Texture2 {
     pub raw: metal::Texture,
     pub format: wgt::TextureFormat,
