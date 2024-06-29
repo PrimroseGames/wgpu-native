@@ -4350,6 +4350,22 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
 
 #[no_mangle]
 #[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanDevicePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let result = device
+        .context
+        .device_as_hal::<wgc::api::Vulkan, _, u64>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_device().handle();
+            unsafe { std::mem::transmute::<_, u64>(raw_handle) }
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
     let instance = instance.as_ref().expect("invalid instance");
 
