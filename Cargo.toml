@@ -22,27 +22,19 @@ resolver = "2"
 
 [workspace.dependencies.wgc]
 package = "wgpu-core"
-git = "https://github.com/gfx-rs/wgpu"
-rev = "87576b72b37c6b78b41104eb25fc31893af94092"
 version = "0.21.1"
 
 [workspace.dependencies.wgt]
 package = "wgpu-types"
-git = "https://github.com/gfx-rs/wgpu"
-rev = "87576b72b37c6b78b41104eb25fc31893af94092"
 version = "0.20.0"
 
 [workspace.dependencies.hal]
 package = "wgpu-hal"
-git = "https://github.com/gfx-rs/wgpu"
-rev = "87576b72b37c6b78b41104eb25fc31893af94092"
 version = "0.21.1"
 
 [workspace.dependencies.naga]
 package = "naga"
-git = "https://github.com/gfx-rs/wgpu"
-rev = "87576b72b37c6b78b41104eb25fc31893af94092"
-version = "0.20.1"
+version = "0.20.0"
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
 metal = { version = "0.27.0" }
