@@ -1007,7 +1007,7 @@ pub fn write_global_report(
 ) {
     native_report.surfaces = map_storage_report(&report.surfaces);
 
-    #[cfg(vulkan)]
+    #[cfg(feature="vulkan")]
     if let Some(ref vulkan) = report.vulkan {
         native_report.vulkan = map_hub_report(vulkan);
         native_report.backendType = native::WGPUBackendType_Vulkan;

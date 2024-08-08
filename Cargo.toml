@@ -43,7 +43,13 @@ metal = { version = "0.27.0" }
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [features]
-default = ["wgsl", "spirv", "glsl", "dx12", "metal"]
+default = ["wgsl", "spirv", "dx12", "metal", "renderdoc", "fragile-send-sync-non-atomic-wasm"]
+
+renderdoc = ["wgc/renderdoc"]
+
+fragile-send-sync-non-atomic-wasm = [
+	"wgc/fragile-send-sync-non-atomic-wasm"
+]
 
 #! ### Backends
 # --------------------------------------------------------------------
