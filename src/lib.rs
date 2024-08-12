@@ -4458,7 +4458,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanGraphicsQueueFamilyIndex(
 }
 
 #[no_mangle]
-#[cfg(feature = "vulkan")]
+#[cfg(vulkan)]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPUTexture) -> u64 {
     let texture = texture.as_ref().expect("invalid texture");
 
@@ -4531,7 +4531,7 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
         .context
         .texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
             let hal_texture = hal_texture.unwrap();
-            
+
             // TODO(important): really bad hack because wgpu doesn't expose the fucking raw texture handle from metal
             unsafe {
                 let hal_texture_ptr = std::mem::transmute::<_, &Texture2>(hal_texture);
