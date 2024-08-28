@@ -424,9 +424,9 @@ pub fn write_limits_struct(
     supported_limits.limits = limits;
 
     if let Some(native::WGPUChainedStructOut {
-        sType: native::WGPUSType_SupportedLimitsExtras,
-        ..
-    }) = unsafe { supported_limits.nextInChain.as_ref() }
+                    sType: native::WGPUSType_SupportedLimitsExtras,
+                    ..
+                }) = unsafe { supported_limits.nextInChain.as_ref() }
     {
         unsafe {
             let extras = std::mem::transmute::<
@@ -1217,6 +1217,9 @@ pub fn features_to_native(features: wgt::Features) -> Vec<native::WGPUFeatureNam
     if features.contains(wgt::Features::SHADER_EARLY_DEPTH_TEST) {
         temp.push(native::WGPUNativeFeature_ShaderEarlyDepthTest);
     }
+    if features.contains(wgt::Features::SUBGROUP) {
+        temp.push(native::WGPUNativeFeature_Subgroup);
+    }
 
     temp
 }
@@ -1273,6 +1276,7 @@ pub fn map_feature(feature: native::WGPUFeatureName) -> Option<wgt::Features> {
         native::WGPUNativeFeature_ShaderF64 => Some(Features::SHADER_F64),
         native::WGPUNativeFeature_ShaderPrimitiveIndex => Some(Features::SHADER_PRIMITIVE_INDEX),
         native::WGPUNativeFeature_ShaderEarlyDepthTest => Some(Features::SHADER_EARLY_DEPTH_TEST),
+        native::WGPUNativeFeature_Subgroup => Some(Features::SUBGROUP),
         // fallback, probably not available in wgpu-core
         _ => None,
     }

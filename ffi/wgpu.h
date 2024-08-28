@@ -3,6 +3,13 @@
 
 #include "webgpu.h"
 
+typedef enum WGPUPolygonMode {
+    WGPUPolygonMode_Fill = 0x00000000,
+    WGPUPolygonMode_Line = 0x00000001,
+    WGPUPolygonMode_Point = 0x00000002,
+    WGPUPolygonMode_Force32 = 0x7FFFFFFF
+} WGPUPolygonMode WGPU_ENUM_ATTRIBUTE;
+
 typedef enum WGPUNativeSType {
     // Start at 0003 since that's allocated range for wgpu-native
     WGPUSType_DeviceExtras = 0x00030001,
@@ -53,6 +60,11 @@ typedef enum WGPUNativeFeature {
     WGPUNativeFeature_ShaderI16 = 0x0003001E,
     WGPUNativeFeature_ShaderPrimitiveIndex = 0x0003001F,
     WGPUNativeFeature_ShaderEarlyDepthTest = 0x00030020,
+    WGPUNativeFeature_DualSourceBlending = 0x00030022,
+    WGPUNativeFeature_ShaderInt64 = 0x00030023,
+    WGPUNativeFeature_Subgroup = 0x00030024,
+    WGPUNativeFeature_SubgroupVertex = 0x00030025,
+    WGPUNativeFeature_SubgroupBarrier = 0x00030026,
     WGPUNativeFeature_Force32 = 0x7FFFFFFF
 } WGPUNativeFeature;
 

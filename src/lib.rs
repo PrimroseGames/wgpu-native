@@ -1962,14 +1962,14 @@ pub unsafe extern "C" fn wgpuDeviceCreateComputePipeline(
                     descriptor.compute.constants,
                     descriptor.compute.constantCount,
                 )
-                .iter()
-                .map(|entry| {
-                    (
-                        CStr::from_ptr(entry.key).to_str().unwrap().to_string(),
-                        entry.value,
-                    )
-                })
-                .collect(),
+                    .iter()
+                    .map(|entry| {
+                        (
+                            CStr::from_ptr(entry.key).to_str().unwrap().to_string(),
+                            entry.value,
+                        )
+                    })
+                    .collect(),
             ),
             // TODO(wgpu.h)
             zero_initialize_workgroup_memory: false,
@@ -2119,6 +2119,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderBundleEncoder(
 pub unsafe extern "C" fn wgpuDeviceCreateRenderPipeline(
     device: native::WGPUDevice,
     descriptor: Option<&native::WGPURenderPipelineDescriptor>,
+    polygonMode: native::WGPUPolygonMode,
 ) -> native::WGPURenderPipeline {
     let (device_id, context, error_sink) = {
         let device = device.as_ref().expect("invalid device");
@@ -2200,7 +2201,12 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderPipeline(
                     WGPUSType_PrimitiveDepthClipControl => native::WGPUPrimitiveDepthClipControl
                 )
             ),
-            polygon_mode: wgt::PolygonMode::Fill,
+            polygon_mode: match polygonMode {
+                native::WGPUPolygonMode_Fill => wgt::PolygonMode::Fill,
+                native::WGPUPolygonMode_Line => wgt::PolygonMode::Line,
+                native::WGPUPolygonMode_Point => wgt::PolygonMode::Point,
+                _ => panic!("invalid polygon mode for primitive state"),
+            },
             conservative: false,
         },
         depth_stencil: descriptor
@@ -4444,5 +4450,288 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
             None,
             "wgpuRenderPassEncoderEndPipelineStatisticsQuery",
         ),
+    }
+}
+
+// ----------------------------------------
+// ----------------------------------------
+// PRIMROSE functions below
+// ----------------------------------------
+// ----------------------------------------
+
+
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanDevicePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let result = device
+        .context
+        .device_as_hal::<wgc::api::Vulkan, _, u64>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_device().handle();
+            unsafe { std::mem::transmute::<_, u64>(raw_handle) }
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
+    let instance = instance.as_ref().expect("invalid instance");
+
+    let mut result: u64 = 0;
+
+    let raw_handle = instance
+        .context
+        .instance_as_hal::<wgc::api::Vulkan>()
+        .unwrap()
+        .shared_instance()
+        .raw_instance()
+        .handle();
+
+    result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanQueuePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device
+        .context
+        .device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_queue();
+            result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
+    let instance = instance.as_ref().expect("invalid instance");
+
+    let mut result: u64 = 0;
+
+    instance
+        .context
+        .instance_as_hal::<wgc::api::Vulkan>()
+        .unwrap();
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanPhysicalDevicePointer(
+    device: native::WGPUDevice,
+) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device
+        .context
+        .device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_physical_device();
+            result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+        });
+
+    result
+}
+
+// GraphicsQueueIndex
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanGraphicsQueueFamilyIndex(
+    device: native::WGPUDevice,
+) -> u32 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u32 = 0;
+
+    device
+        .context
+        .device_as_hal::<wgc::api::Vulkan, _, _>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            result = hal_device.queue_family_index()
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(vulkan)]
+pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPUTexture) -> u64 {
+    let texture = texture.as_ref().expect("invalid texture");
+
+    let result = texture
+        .context
+        .texture_as_hal::<wgc::api::Vulkan, _, u64>(texture.id, |hal_texture| {
+            let hal_texture = hal_texture.unwrap();
+            let raw_handle = hal_texture.raw_handle();
+            unsafe { std::mem::transmute::<_, u64>(raw_handle) }
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(dx12)]
+pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDevice) -> u64 {
+    let device = texture.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device
+        .context
+        .device_as_hal::<wgc::api::Dx12, _, _>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_device();
+            result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(dx12)]
+pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevice) -> u64 {
+    let device = device.as_ref().expect("invalid device");
+
+    let mut result: u64 = 0;
+
+    device
+        .context
+        .device_as_hal::<wgc::api::Dx12, _, _>(device.id, |hal_device| {
+            let hal_device = hal_device.unwrap();
+            let raw_handle = hal_device.raw_queue();
+            result = unsafe { std::mem::transmute::<_, u64>(raw_handle) };
+        });
+
+    result
+}
+
+#[derive(Debug)]
+#[cfg(metal)]
+pub struct Texture2 {
+    pub raw: metal::Texture,
+    pub format: wgt::TextureFormat,
+    pub raw_type: metal::MTLTextureType,
+    pub array_layers: u32,
+    pub mip_levels: u32,
+    pub copy_size: hal::CopyExtent,
+}
+
+#[no_mangle]
+#[cfg(metal)]
+pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUTexture) -> u64 {
+    let texture = texture.as_ref().expect("invalid texture");
+
+    let mut result: u64 = 0;
+
+    texture
+        .context
+        .texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
+            let hal_texture = hal_texture.unwrap();
+
+            // TODO(important): really bad hack because wgpu doesn't expose the fucking raw texture handle from metal
+            unsafe {
+                let hal_texture_ptr = std::mem::transmute::<_, &Texture2>(hal_texture);
+                result = std::mem::transmute::<_, u64>(hal_texture_ptr.raw.clone());
+            }
+        });
+
+    result
+}
+
+#[no_mangle]
+#[cfg(metal)]
+pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
+    adapter: native::WGPUAdapter,
+    mtl_command_queue: *mut metal::MTLCommandQueue,
+    descriptor: Option<&native::WGPUDeviceDescriptor>,
+) -> native::WGPUDevice {
+    use metal::foreign_types;
+
+    unsafe {
+        use foreign_types::ForeignType;
+        use hal::api::Metal;
+        use wgc::{device, id::TypedId};
+
+        let adapter = adapter.as_ref().expect("invalid adapter");
+        let context = &adapter.context.clone();
+        let adapter_id = adapter.id;
+
+        let adapter_limits = match gfx_select!(adapter_id => context.adapter_limits(adapter_id)) {
+            Ok(adapter_limits) => adapter_limits,
+            Err(cause) => {
+                let msg = CString::new(format_error(context, &cause)).unwrap();
+                return std::ptr::null_mut();
+            }
+        };
+        let base_limits = get_base_device_limits_from_adapter_limits(&adapter_limits);
+
+        let (mut desc, trace_str, device_lost_handler) = match descriptor {
+            Some(descriptor) => {
+                let (desc, trace_str) = follow_chain!(
+                    map_device_descriptor((descriptor, base_limits),
+                    WGPUSType_DeviceExtras => native::WGPUDeviceExtras)
+                );
+                let device_lost_handler = DeviceLostCallback {
+                    callback: descriptor.deviceLostCallback,
+                    userdata: descriptor.deviceLostUserdata,
+                };
+                (desc, trace_str, device_lost_handler)
+            }
+            None => (
+                wgt::DeviceDescriptor {
+                    required_limits: base_limits,
+                    ..Default::default()
+                },
+                std::ptr::null(),
+                DEFAULT_DEVICE_LOST_HANDLER,
+            ),
+        };
+
+        //desc.required_features.set(wgt::Features::SHADER_UNUSED_VERTEX_OUTPUT, true);
+
+        let mtl_queue = ::metal::CommandQueue::from_ptr(mtl_command_queue);
+        let mtl_device = mtl_queue.device();
+
+        let open_device = hal::OpenDevice::<hal::metal::Api> {
+            device: <wgc::api::Metal as hal::Api>::Device::device_from_raw(
+                mtl_device.to_owned(),
+                desc.required_features,
+            ),
+            queue: <wgc::api::Metal as hal::Api>::Queue::queue_from_raw(mtl_queue, 1.0),
+        };
+
+        let res =
+            adapter
+                .context
+                .create_device_from_hal(adapter.id, open_device, &desc, None, (), ());
+
+        let context = adapter.context.clone();
+
+        Arc::into_raw(Arc::new(WGPUDeviceImpl {
+            context: context.clone(),
+            id: res.0,
+            queue: Arc::new(QueueId {
+                context: context.clone(),
+                id: res.1,
+            }),
+            error_sink: Arc::new(Mutex::new(ErrorSinkRaw::new(DEFAULT_DEVICE_LOST_HANDLER))),
+        }))
     }
 }
