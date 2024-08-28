@@ -1175,12 +1175,12 @@ pub fn features_to_native(features: wgt::Features) -> Vec<native::WGPUFeatureNam
     // if features.contains(wgt::Features::ADDRESS_MODE_CLAMP_TO_BORDER) {
     //     temp.push(native::WGPUNativeFeature_AddressModeClampToBorder);
     // }
-    // if features.contains(wgt::Features::POLYGON_MODE_LINE) {
-    //     temp.push(native::WGPUNativeFeature_PolygonModeLine);
-    // }
-    // if features.contains(wgt::Features::POLYGON_MODE_POINT) {
-    //     temp.push(native::WGPUNativeFeature_PolygonModePoint);
-    // }
+     if features.contains(wgt::Features::POLYGON_MODE_LINE) {
+         temp.push(native::WGPUNativeFeature_PolygonModeLine);
+     }
+     if features.contains(wgt::Features::POLYGON_MODE_POINT) {
+         temp.push(native::WGPUNativeFeature_PolygonModePoint);
+     }
     // if features.contains(wgt::Features::CONSERVATIVE_RASTERIZATION) {
     //     temp.push(native::WGPUNativeFeature_ConservativeRasterization);
     // }
