@@ -46,8 +46,8 @@ typedef enum WGPUNativeFeature {
     // TODO: requires wgpu.h api change
     // WGPUNativeFeature_AddressModeClampToZero = 0x00030011,
     // WGPUNativeFeature_AddressModeClampToBorder = 0x00030012,
-     WGPUNativeFeature_PolygonModeLine = 0x00030013,
-     WGPUNativeFeature_PolygonModePoint = 0x00030014,
+    WGPUNativeFeature_PolygonModeLine = 0x00030013,
+    WGPUNativeFeature_PolygonModePoint = 0x00030014,
     // WGPUNativeFeature_ConservativeRasterization = 0x00030015,
     // WGPUNativeFeature_ClearTexture = 0x00030016,
     // WGPUNativeFeature_SpirvShaderPassthrough = 0x00030017,

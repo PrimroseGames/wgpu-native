@@ -1263,8 +1263,8 @@ pub fn map_feature(feature: native::WGPUFeatureName) -> Option<wgt::Features> {
         // TODO: requires wgpu.h api change
         // native::WGPUNativeFeature_AddressModeClampToZero => Some(Features::ADDRESS_MODE_CLAMP_TO_ZERO),
         // native::WGPUNativeFeature_AddressModeClampToBorder => Some(Features::ADDRESS_MODE_CLAMP_TO_BORDER),
-        // native::WGPUNativeFeature_PolygonModeLine => Some(Features::POLYGON_MODE_LINE),
-        // native::WGPUNativeFeature_PolygonModePoint => Some(Features::POLYGON_MODE_POINT),
+        native::WGPUNativeFeature_PolygonModeLine => Some(Features::POLYGON_MODE_LINE),
+        native::WGPUNativeFeature_PolygonModePoint => Some(Features::POLYGON_MODE_POINT),
         // native::WGPUNativeFeature_ConservativeRasterization => Some(Features::CONSERVATIVE_RASTERIZATION),
         // native::WGPUNativeFeature_ClearTexture => Some(Features::CLEAR_TEXTURE),
         // native::WGPUNativeFeature_SpirvShaderPassthrough => Some(Features::SPIRV_SHADER_PASSTHROUGH),
