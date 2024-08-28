@@ -40,16 +40,26 @@ package = "naga"
 git = "https://github.com/gfx-rs/wgpu"
 tag = "v22.1.0"
 
+
+[target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
+metal = { version = "0.27.0" }
+
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 [features]
-default = ["wgsl", "spirv", "glsl", "dx12", "metal"]
+default = ["wgsl", "spirv", "dx12", "metal", "renderdoc", "fragile-send-sync-non-atomic-wasm"]
+
+renderdoc = ["wgc/renderdoc"]
+
+fragile-send-sync-non-atomic-wasm = [
+	"wgc/fragile-send-sync-non-atomic-wasm"
+]
 
 #! ### Backends
 # --------------------------------------------------------------------
 #! ⚠️ WIP: Not all backends can be manually configured today.
-#! On Windows, Linux & Android the Vulkan & GLES backends are always enabled.
+#! On Windows & Linux the Vulkan & GLES backends are always enabled.
 #! See [#3514](https://github.com/gfx-rs/wgpu/issues/3514) for more details.
 
 ## Enables the DX12 backend on Windows.
@@ -72,10 +82,10 @@ vulkan-portability = ["wgc/vulkan"]
 # --------------------------------------------------------------------
 
 ## Enable accepting SPIR-V shaders as input.
-spirv = ["naga/spv-in", "wgc/spirv"]
+spirv = ["naga/spv-in"]
 
 ## Enable accepting GLSL shaders as input.
-glsl = ["naga/glsl-in", "wgc/glsl"]
+glsl = ["naga/glsl-in"]
 
 ## Enable accepting WGSL shaders as input.
 wgsl = ["wgc/wgsl"]
@@ -93,10 +103,6 @@ api_log_info = ["wgc/api_log_info"]
 
 ## Enables serialization via `serde` on common wgpu types.
 serde = ["dep:serde", "wgc/serde"]
-
-# Uncomment once upstream adds it again — https://github.com/gfx-rs/wgpu/issues/5974
-# ## Allow writing of trace capture files. See [`Adapter::request_device`].
-# trace = ["serde", "wgc/trace"]
 
 ## Allow deserializing of trace capture files that were written with the `trace` feature.
 ## To replay a trace file use the [wgpu player](https://github.com/gfx-rs/wgpu/tree/trunk/player).
@@ -116,8 +122,8 @@ workspace = true
 workspace = true
 features = ["gles"]
 
-# We want the wgpu-core Vulkan backend on Unix (but not macOS, iOS) and Windows.
-[target.'cfg(any(windows, all(unix, not(target_os = "ios"), not(target_os = "macos"))))'.dependencies.wgc]
+# We want the wgpu-core Vulkan backend on Unix (but not emscripten, macOS, iOS) and Windows.
+[target.'cfg(any(windows, all(unix, not(target_os = "emscripten"), not(target_os = "ios"), not(target_os = "macos"))))'.dependencies.wgc]
 workspace = true
 features = ["vulkan"]
 
@@ -126,11 +132,14 @@ features = ["vulkan"]
 workspace = true
 features = ["gles"]
 
+[dependencies.wgt]
+workspace = true
+
 [dependencies.hal]
 workspace = true
 
-[target.'cfg(all(unix, not(target_os = "ios"), not(target_os = "macos")))'.dependencies]
-hal = { workspace = true, features = ["renderdoc"] }
+[dependencies.naga]
+workspace = true
 
 [target.'cfg(windows)'.dependencies]
 hal = { workspace = true, features = [
@@ -138,13 +147,6 @@ hal = { workspace = true, features = [
 	"renderdoc",
 	"windows_rs",
 ] }
-
-[dependencies.wgt]
-workspace = true
-
-[dependencies.naga]
-workspace = true
-optional = true
 
 [dependencies.serde]
 version = "1"
@@ -159,4 +161,5 @@ parking_lot = "0.12"
 smallvec = "1"
 
 [build-dependencies]
-bindgen = "0.70"
+bindgen = "0.79"
+cfg_aliases = "0.1"
