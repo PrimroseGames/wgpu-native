@@ -4462,7 +4462,7 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
 
 
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanDevicePointer(device: native::WGPUDevice) -> u64 {
     let device = device.as_ref().expect("invalid device");
 
@@ -4477,8 +4477,8 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanDevicePointer(device: native::WGPUDe
     result
 }
 
-#[no_mangle]
-#[cfg(vulkan)]
+#[no_mangle]#[cfg(feature="vulkan")]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
     let instance = instance.as_ref().expect("invalid instance");
 
@@ -4498,7 +4498,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanInstancePointer(instance: native::WG
 }
 
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanQueuePointer(device: native::WGPUDevice) -> u64 {
     let device = device.as_ref().expect("invalid device");
 
@@ -4516,7 +4516,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanQueuePointer(device: native::WGPUDev
 }
 
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimGetVulkanInstancePointer(instance: native::WGPUInstance) -> u64 {
     let instance = instance.as_ref().expect("invalid instance");
 
@@ -4531,7 +4531,7 @@ pub unsafe extern "C" fn wgpuPrimGetVulkanInstancePointer(instance: native::WGPU
 }
 
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanPhysicalDevicePointer(
     device: native::WGPUDevice,
 ) -> u64 {
@@ -4552,7 +4552,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanPhysicalDevicePointer(
 
 // GraphicsQueueIndex
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanGraphicsQueueFamilyIndex(
     device: native::WGPUDevice,
 ) -> u32 {
@@ -4571,7 +4571,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanGraphicsQueueFamilyIndex(
 }
 
 #[no_mangle]
-#[cfg(vulkan)]
+#[cfg(feature="vulkan")]
 pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPUTexture) -> u64 {
     let texture = texture.as_ref().expect("invalid texture");
 
@@ -4587,7 +4587,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPU
 }
 
 #[no_mangle]
-#[cfg(dx12)]
+#[cfg(feature="dx12")]
 pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDevice) -> u64 {
     let device = texture.as_ref().expect("invalid device");
 
@@ -4605,7 +4605,7 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDev
 }
 
 #[no_mangle]
-#[cfg(dx12)]
+#[cfg(feature="dx12")]
 pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevice) -> u64 {
     let device = device.as_ref().expect("invalid device");
 
@@ -4623,7 +4623,7 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevic
 }
 
 #[derive(Debug)]
-#[cfg(metal)]
+#[cfg(all(any(target_os = "ios", target_os = "macos"), feature = "metal"))]
 pub struct Texture2 {
     pub raw: metal::Texture,
     pub format: wgt::TextureFormat,
@@ -4634,7 +4634,7 @@ pub struct Texture2 {
 }
 
 #[no_mangle]
-#[cfg(metal)]
+#[cfg(all(any(target_os = "ios", target_os = "macos"), feature = "metal"))]
 pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUTexture) -> u64 {
     let texture = texture.as_ref().expect("invalid texture");
 
@@ -4656,7 +4656,7 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
 }
 
 #[no_mangle]
-#[cfg(metal)]
+#[cfg(all(any(target_os = "ios", target_os = "macos"), feature = "metal"))]
 pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
     adapter: native::WGPUAdapter,
     mtl_command_queue: *mut metal::MTLCommandQueue,

@@ -48,7 +48,7 @@ metal = { version = "0.27.0" }
 crate-type = ["cdylib", "staticlib", "rlib"]
 
 [features]
-default = ["wgsl", "spirv", "dx12", "metal", "renderdoc", "fragile-send-sync-non-atomic-wasm"]
+default = ["wgsl", "spirv", "dx12", "metal", "vulkan", "renderdoc", "fragile-send-sync-non-atomic-wasm"]
 
 renderdoc = ["wgc/renderdoc"]
 
@@ -67,6 +67,9 @@ dx12 = ["wgc/dx12"]
 
 ## Enables the Metal backend on macOS & iOS.
 metal = ["wgc/metal"]
+
+## Enable the `vulkan` backend.
+vulkan = ["wgc/vulkan"]
 
 ## Enables the GLES backend via [ANGLE](https://github.com/google/angle) on macOS using.
 angle = ["wgc/gles"]
