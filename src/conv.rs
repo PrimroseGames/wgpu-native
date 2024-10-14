@@ -1027,14 +1027,15 @@ pub fn write_global_report(
 ) {
     native_report.surfaces = map_storage_report(&report.surfaces);
 
-    #[cfg(any(
-        all(
-            any(target_os = "ios", target_os = "macos"),
-            feature = "vulkan-portability"
-        ),
-        windows,
-        all(unix, not(target_os = "ios"), not(target_os = "macos"))
-    ))]
+    #[cfg(all(not(target_arch="wasm32"),
+        any(
+            all(
+                any(target_os = "ios", target_os = "macos"),
+                feature = "vulkan-portability"
+            ),
+            windows,
+            all(unix, not(target_os = "ios"), not(target_os = "macos"))
+    )))]
     if let Some(ref vulkan) = report.vulkan {
         native_report.vulkan = map_hub_report(vulkan);
         native_report.backendType = native::WGPUBackendType_Vulkan;
