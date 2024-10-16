@@ -37,7 +37,7 @@ package = "naga"
 version = "0.20.0"
 
 [target.'cfg(any(target_os="macos", target_os="ios"))'.dependencies]
-metal = { version = "0.27.0" }
+metal = { version = "0.28.0" }
 
 [lib]
 crate-type = ["cdylib", "staticlib", "rlib"]
