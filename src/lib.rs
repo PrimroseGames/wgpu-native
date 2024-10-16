@@ -4587,7 +4587,7 @@ pub unsafe extern "C" fn wgpuPrimExGetVulkanTexturePointer(texture: native::WGPU
 }
 
 #[no_mangle]
-#[cfg(all(feature="dx12", not(target_arch = "wasm32")))]
+#[cfg(dx12)]
 pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDevice) -> u64 {
     let device = texture.as_ref().expect("invalid device");
 
@@ -4605,7 +4605,7 @@ pub unsafe extern "C" fn wgpuPrimExGetDx12DevicePointer(texture: native::WGPUDev
 }
 
 #[no_mangle]
-#[cfg(all(feature="dx12", not(target_arch = "wasm32")))]
+#[cfg(dx12)]
 pub unsafe extern "C" fn wgpuPrimExGetDx12QueuePointer(device: native::WGPUDevice) -> u64 {
     let device = device.as_ref().expect("invalid device");
 
@@ -4642,13 +4642,14 @@ pub unsafe extern "C" fn wgpuPrimExGetMetalTexturePointer(texture: native::WGPUT
 
     texture
         .context
-        .texture_as_hal::<wgc::api::Metal, _>(texture.id, |hal_texture| {
+        .texture_as_hal::<wgc::api::Metal, _, u64>(texture.id, |hal_texture| {
             let hal_texture = hal_texture.unwrap();
 
             // TODO(important): really bad hack because wgpu doesn't expose the fucking raw texture handle from metal
             unsafe {
                 let hal_texture_ptr = std::mem::transmute::<_, &Texture2>(hal_texture);
                 result = std::mem::transmute::<_, u64>(hal_texture_ptr.raw.clone());
+                result
             }
         });
 
@@ -4667,7 +4668,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
     unsafe {
         use foreign_types::ForeignType;
         use hal::api::Metal;
-        use wgc::{device, id::TypedId};
+        use wgc::{device};
 
         let adapter = adapter.as_ref().expect("invalid adapter");
         let context = &adapter.context.clone();
@@ -4676,7 +4677,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
         let adapter_limits = match gfx_select!(adapter_id => context.adapter_limits(adapter_id)) {
             Ok(adapter_limits) => adapter_limits,
             Err(cause) => {
-                let msg = CString::new(format_error(context, &cause)).unwrap();
+                let msg = CString::new(format_error(&cause)).unwrap();
                 return std::ptr::null_mut();
             }
         };
@@ -4684,7 +4685,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
 
         let (mut desc, trace_str, device_lost_handler) = match descriptor {
             Some(descriptor) => {
-                let (desc, trace_str) = follow_chain!(
+                let (desc, trace_str, error_callback) = follow_chain!(
                     map_device_descriptor((descriptor, base_limits),
                     WGPUSType_DeviceExtras => native::WGPUDeviceExtras)
                 );
@@ -4706,7 +4707,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
 
         //desc.required_features.set(wgt::Features::SHADER_UNUSED_VERTEX_OUTPUT, true);
 
-        let mtl_queue = ::metal::CommandQueue::from_ptr(mtl_command_queue);
+        let mtl_queue = metal::CommandQueue::from_ptr(mtl_command_queue);
         let mtl_device = mtl_queue.device();
 
         let open_device = hal::OpenDevice::<hal::metal::Api> {
@@ -4720,7 +4721,7 @@ pub unsafe extern "C" fn wgpuPrimExMetalCreateDeviceAndQueue(
         let res =
             adapter
                 .context
-                .create_device_from_hal(adapter.id, open_device, &desc, None, (), ());
+                .create_device_from_hal(adapter.id, open_device, &desc, None, None, None);
 
         let context = adapter.context.clone();
 
